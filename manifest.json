@@ -17,6 +17,13 @@
             "name": "Executables directories",
             "default_value": "~/Tools,~/OtherTools",
             "description": "Paths to search for executables and AppImages, separated by commas"
+        },
+        {
+            "id": "exec_launcher_enable_lib_filter",
+            "type": "bool",
+            "name": "Experimental lib filter",
+            "default_value": false,
+            "description": "Enable experimental filtering of library files"
         }
     ]
 }
