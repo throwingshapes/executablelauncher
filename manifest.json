@@ -24,7 +24,7 @@
             "name": "Experimental lib filter",
             "default_value": "false",
             "description": "Exclude library files (names/folders containing “lib” or .so)",
-            "items": [
+            "options": [
                 {
                     "label": "Disabled",
                     "value": "false"
