@@ -20,10 +20,20 @@
         },
         {
             "id": "exec_launcher_enable_lib_filter",
-            "type": "bool",
+            "type": "select",
             "name": "Experimental lib filter",
-            "default_value": false,
-            "description": "Enable experimental filtering of library files"
+            "default_value": "false",
+            "description": "Exclude library files (names/folders containing “lib” or .so)",
+            "items": [
+                {
+                    "label": "Disabled",
+                    "value": "false"
+                },
+                {
+                    "label": "Enabled",
+                    "value": "true"
+                }
+            ]
         }
     ]
 }
