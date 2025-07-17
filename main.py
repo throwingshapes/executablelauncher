@@ -18,10 +18,10 @@ from ulauncher.api.shared.action.ExtensionCustomAction import ExtensionCustomAct
 logger = logging.getLogger(__name__)
 ext_icon = 'images/icon.png'
 directories = []
-app_images = []
+executables = []
 
 
-class AppImageLauncherExtension(Extension):
+class ExecLauncherExtension(Extension):
 
     def __init__(self):
         super().__init__()
@@ -34,35 +34,44 @@ class AppImageLauncherExtension(Extension):
     def show_notification(self, title, text=None, icon=ext_icon):
         logger.debug('Show notification: %s' % text)
         icon_full_path = os.path.join(os.path.dirname(__file__), icon)
-        Notify.init("AppImageLauncher")
+        Notify.init("ExecutableLauncher")
         Notify.Notification.new(title, text, icon_full_path).show()
 
 
 class KeywordQueryEventListener(EventListener):
 
-    global directories, app_images
+    global directories, executables
 
     def on_event(self, event, extension):
         return RenderResultListAction(list(islice(self.generate_results(event, extension), 10)))
     
     def generate_results(self, event, extension):
-        app_images = [];
+        executables = [];
         for directory in directories:
             if os.path.isdir(directory):
                 for root, dirs, files in os.walk(directory):
-                    for file in files:
-                        if file.endswith('.AppImage'):
-                            app_images.append(os.path.join(root, file))
-        if (len(app_images) == 0):
-            extension.show_notification("Error", "No AppImages found in the configured directories", icon=ext_icon)
+                    for filename in files:
+                        path = os.path.join(root, filename)
+                        if not (os.path.isfile(path) and os.access(path, os.X_OK)):
+                            continue
+                        try:  # check for ELF-Magic: 0x7f 'E' 'L' 'F'
+                            with open(path, 'rb') as f:
+                                header = f.read(4)
+                            if header != b'\x7fELF':
+                                continue
+                        except Exception:
+                            continue
+                        executables.append(path)
+        if (len(executables) == 0):
+            extension.show_notification("Error", "No executables found in the configured directories", icon=ext_icon)
         if event.get_argument():
-            app_images = self.filter_strings(app_images, event.get_argument())
-        for app_image in app_images:
+            executables = self.filter_strings(executables, event.get_argument())
+        for executable in executables:
             yield ExtensionResultItem(
                 icon='images/icon.png',
-                name=os.path.splitext(os.path.basename(app_image))[0],
-                description='Launch {}'.format(os.path.basename(app_image)),
-                on_enter=ExtensionCustomAction(app_image)
+                name=os.path.splitext(os.path.basename(executable))[0],
+                description='Launch {}'.format(os.path.basename(executable)),
+                on_enter=ExtensionCustomAction(executable)
             )
 
     def filter_strings(event,strings, filter_text):
@@ -87,9 +96,9 @@ class PreferencesEventListener(EventListener):
         global directories
         string = ''
         if hasattr(event, 'preferences'):
-            string = event.preferences['ailauncher_directories']
+            string = event.preferences['exec_launcher_directories']
         else:
-            if (event.id=='ailauncher_directories'):
+            if (event.id=='exec_launcher_directories'):
                 string = event.new_value
         if string!='':
             directories = []
@@ -106,4 +115,4 @@ class PreferencesEventListener(EventListener):
                         directories.append(path)
 
 if __name__ == '__main__':
-    AppImageLauncherExtension().run()
+    ExecLauncherExtension().run()

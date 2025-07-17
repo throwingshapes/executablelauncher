@@ -1,22 +1,22 @@
 {
     "required_api_version": "^2.0.0",
-    "name": "AppImage launcher",
-    "description": "launch your AppImages",
-    "developer_name": "Alejandro Torres",
+    "name": "Executable Launcher",
+    "description": "Launch your executables",
+    "developer_name": "ThrowingShapes",
     "icon": "images/icon.png",
     "preferences": [
         {
-            "id": "ailauncher_kw",
+            "id": "ts_exec_launcher",
             "type": "keyword",
-            "name": "AppImage launcher",
-            "default_value": "ai"
+            "name": "Executable Launcher",
+            "default_value": "ex"
         },
         {
-            "id": "ailauncher_directories",
+            "id": "exec_launcher_directories",
             "type": "input",
-            "name": "AppImage directories",
-            "default_value": "~/AppImages",
-            "description": "Paths to search for AppImages, separated by commas"
+            "name": "Executables directories",
+            "default_value": "~/Tools,~/OtherTools",
+            "description": "Paths to search for executables and AppImages, separated by commas"
         }
     ]
 }
