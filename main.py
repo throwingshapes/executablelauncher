@@ -76,10 +76,12 @@ class KeywordQueryEventListener(EventListener):
         else:
             executables.sort(key=lambda p: os.path.basename(p).lower())
         for executable in executables:
+            name = os.path.splitext(os.path.basename(executable))[0]
+            folder = os.path.basename(os.path.dirname(executable))
             yield ExtensionResultItem(
                 icon='images/icon.png',
-                name=os.path.splitext(os.path.basename(executable))[0],
-                description='Launch {}'.format(os.path.basename(executable)),
+                name=name,
+                description=f'Launch {name} (in ../{folder})',
                 on_enter=ExtensionCustomAction(executable)
             )
 
