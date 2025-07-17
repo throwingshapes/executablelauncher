@@ -46,11 +46,15 @@ class KeywordQueryEventListener(EventListener):
         return RenderResultListAction(list(islice(self.generate_results(event, extension), 10)))
     
     def generate_results(self, event, extension):
+        query = event.get_argument().lower() if event.get_argument() else ""
         executables = [];
         for directory in directories:
             if os.path.isdir(directory):
                 for root, dirs, files in os.walk(directory):
                     for filename in files:
+                        if query and query not in filename.lower():
+                            continue
+
                         path = os.path.join(root, filename)
                         if not (os.path.isfile(path) and os.access(path, os.X_OK)):
                             continue
@@ -64,8 +68,6 @@ class KeywordQueryEventListener(EventListener):
                         executables.append(path)
         if (len(executables) == 0):
             extension.show_notification("Error", "No executables found in the configured directories", icon=ext_icon)
-        if event.get_argument():
-            executables = self.filter_strings(executables, event.get_argument())
         for executable in executables:
             yield ExtensionResultItem(
                 icon='images/icon.png',
@@ -73,15 +75,6 @@ class KeywordQueryEventListener(EventListener):
                 description='Launch {}'.format(os.path.basename(executable)),
                 on_enter=ExtensionCustomAction(executable)
             )
-
-    def filter_strings(strings, filter_text):
-        filtered_strings = []
-        for string in strings:
-            if filter_text.lower() in string.lower():
-                filtered_strings.append(string)
-        
-        return filtered_strings
-
 
 class ItemEnterEventListener(EventListener):
 
