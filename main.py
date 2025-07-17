@@ -68,6 +68,13 @@ class KeywordQueryEventListener(EventListener):
                         executables.append(path)
         if (len(executables) == 0):
             extension.show_notification("Error", "No executables found in the configured directories", icon=ext_icon)
+        if query:
+            executables.sort(key=lambda p: (
+                not os.path.basename(p).lower().startswith(query),
+                os.path.basename(p).lower()
+            ))
+        else:
+            executables.sort(key=lambda p: os.path.basename(p).lower())
         for executable in executables:
             yield ExtensionResultItem(
                 icon='images/icon.png',
