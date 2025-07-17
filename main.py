@@ -74,7 +74,7 @@ class KeywordQueryEventListener(EventListener):
                 on_enter=ExtensionCustomAction(executable)
             )
 
-    def filter_strings(event,strings, filter_text):
+    def filter_strings(strings, filter_text):
         filtered_strings = []
         for string in strings:
             if filter_text.lower() in string.lower():
