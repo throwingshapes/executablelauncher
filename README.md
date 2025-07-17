@@ -1,10 +1,10 @@
 
 # AILauncher
-A ulauncher AppImage launcher
+A ulauncher executable launcher
 
 # Installation
 1. Install [Ulauncher](https://ulauncher.io/#Download). 
-2. Just add `https://github.com/atorresg/appimagelauncher` at Extensions section.
+2. Just add `https://github.com/throwingshapes/executablelauncher` at Extensions section.
 
 ## Usage
-- ai #     : launch app given its filename
+- ex #     : launch exec given its filename
