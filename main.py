@@ -32,6 +32,13 @@ def is_library(path):
         'lib' in parent
     )
 
+def as_bool(val):
+    if isinstance(val, bool):
+        return val
+    if isinstance(val, str):
+        return val.lower() in ("true", "1", "yes", "on")
+    return bool(val)
+
 class ExecLauncherExtension(Extension):
 
     def __init__(self):
@@ -140,10 +147,10 @@ class PreferencesEventListener(EventListener):
                         path = path.replace("~", home_dir, 1)
                     if os.path.isdir(path):
                         directories.append(path)
-        if hasattr(event, 'preferences'):
-            lib_filter = bool(event.preferences.get('exec_launcher_enable_lib_filter', False))
-        elif event.id == 'exec_launcher_enable_lib_filter':
-             lib_filter = bool(event.new_value)
+        if hasattr(event, "preferences"):
+            lib_filter = as_bool(event.preferences.get("exec_launcher_enable_lib_filter", "false"))
+        elif event.id == "exec_launcher_enable_lib_filter":
+            lib_filter = as_bool(event.new_value)
 
 if __name__ == '__main__':
     ExecLauncherExtension().run()
