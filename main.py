@@ -22,17 +22,23 @@ executables = []
 lib_filter = False
 
 def is_library(path):
-    """Return True if this looks like a lib file we want to filter out."""
+    """Return *True* if *path* looks like an artefact we want to hide.
+
+    The heuristic is intentionally simple – it rejects any file or parent
+    folder containing the substring "lib" **or** any filename that ends
+    with the typical Linux shared‑object suffix ``.so``.
+    """
     name   = os.path.basename(path).lower()
     parent = os.path.basename(os.path.dirname(path)).lower()
-    # Name enthält "lib" oder endet auf ".so" oder übergeordneter Ordner enthält "lib"
-    return (
-        'lib' in name or
-        '.so' in name or
-        'lib' in parent
-    )
+    return "lib" in name or ".so" in name or "lib" in parent
 
 def as_bool(val):
+    """Convert Ulauncher preference **strings** to real Python booleans.
+
+    Ulauncher stores *checkbox* and *select* values as strings ("true",
+    "false", "1" …).  This helper normalises them so the rest of the code
+    can work with genuine **bool** values.
+    """
     if isinstance(val, bool):
         return val
     if isinstance(val, str):
@@ -40,6 +46,7 @@ def as_bool(val):
     return bool(val)
 
 class ExecLauncherExtension(Extension):
+    """Ulauncher entry point."""    
 
     def __init__(self):
         super().__init__()
@@ -65,30 +72,31 @@ class KeywordQueryEventListener(EventListener):
     
     def generate_results(self, event, extension):
         query = event.get_argument().lower() if event.get_argument() else ""
-        executables = [];
+        executables = []; # fresh list on every query so old results don't linger
         for directory in directories:
             if os.path.isdir(directory):
                 for root, dirs, files in os.walk(directory):
                     for filename in files:
-                        # Namens-Filter
+                        # Filename filter – speed‑up by ignoring mismatches early
                         if query and query not in filename.lower():
                             continue
 
                         path = os.path.join(root, filename)
-                        # Nur reguläre Dateien mit X-Bit
+
+                        # Only keep regular files with the executable bit set
                         if not (os.path.isfile(path) and os.access(path, os.X_OK)):
                             continue
 
-                        # Shell-Skripte direkt aufnehmen
+                        # Always accept shell scripts (they may not be ELF)
                         if filename.lower().endswith('.sh'):
                             executables.append(path)
                             continue
 
-                        # Optionaler Lib-Filter
+                        # Optionally hide libraries to keep result list tidy
                         if lib_filter and is_library(path):
                             continue
 
-                        # ELF-Magic prüfen für alles Andere
+                        # For everything else, confirm it's an ELF binary/AppImage
                         try:
                             with open(path, 'rb') as f:
                                 if f.read(4) != b'\x7fELF':
@@ -100,12 +108,15 @@ class KeywordQueryEventListener(EventListener):
         if (len(executables) == 0):
             extension.show_notification("Error", "No executables found in the configured directories", icon=ext_icon)
         if query:
+            # Prioritise filenames that start with the query text
             executables.sort(key=lambda p: (
                 not os.path.basename(p).lower().startswith(query),
                 os.path.basename(p).lower()
             ))
         else:
             executables.sort(key=lambda p: os.path.basename(p).lower())
+        
+        # Convert paths into Ulauncher result items
         for executable in executables:
             name = os.path.splitext(os.path.basename(executable))[0]
             folder = os.path.basename(os.path.dirname(executable))
