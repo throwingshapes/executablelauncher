@@ -26,12 +26,12 @@
             "description": "Exclude library files (names/folders containing “lib” or .so)",
             "options": [
                 {
-                    "name": "Disabled",
-                    "value": "false"
+                    "value": "false",
+                    "text": "Disabled"
                 },
                 {
-                    "name": "Enabled",
-                    "value": "true"
+                    "value": "true",
+                    "text": "Enabled"
                 }
             ]
         }
